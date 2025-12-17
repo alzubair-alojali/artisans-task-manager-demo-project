@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Enums\roleEnum;
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // 1. Create Roles
-        foreach (roleEnum::cases() as $role) {
+        foreach (UserRole::cases() as $role) {
             Role::firstOrCreate(['name' => $role->value]);
         }
 
@@ -26,10 +26,10 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Admin User',
                 'password' => bcrypt('password'),
-                'role' => roleEnum::ADMIN,
+                'role' => UserRole::ADMIN,
             ]
         );
-        $admin->assignRole(roleEnum::ADMIN->value);
+        $admin->assignRole(UserRole::ADMIN->value);
 
         // 3. Create Manager User
         $manager = User::firstOrCreate(
@@ -37,10 +37,10 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Manager User',
                 'password' => bcrypt('password'),
-                'role' => roleEnum::MANAGER,
+                'role' => UserRole::MANAGER,
             ]
         );
-        $manager->assignRole(roleEnum::MANAGER->value);
+        $manager->assignRole(UserRole::MANAGER->value);
 
         // 4. Create Regular User
         $user = User::firstOrCreate(
@@ -48,9 +48,9 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Regular User',
                 'password' => bcrypt('password'),
-                'role' => roleEnum::USER,
+                'role' => UserRole::USER,
             ]
         );
-        $user->assignRole(roleEnum::USER->value);
+        $user->assignRole(UserRole::USER->value);
     }
 }
