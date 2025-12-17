@@ -4,12 +4,15 @@ namespace App\Models;
 
 use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Task extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'title',
@@ -20,22 +23,25 @@ class Task extends Model
         'assigned_to',
     ];
 
-    protected $casts = [
-        'status' => TaskStatus::class,
-        'priority' => TaskPriority::class,
-    ];
+    protected function casts(): array
+    {
+        return [
+            'status' => TaskStatus::class,
+            'priority' => TaskPriority::class,
+        ];
+    }
 
-    public function project()
+    public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
     }
 
-    public function assignee()
+    public function assignee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    public function comments()
+    public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable');
     }

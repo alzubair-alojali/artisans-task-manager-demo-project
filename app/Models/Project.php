@@ -3,10 +3,17 @@
 namespace App\Models;
 
 use App\Enums\ProjectStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Project extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'title',
         'description',
@@ -15,27 +22,30 @@ class Project extends Model
         'manager_id',
     ];
 
-    protected $casts = [
-        'deadline' => 'datetime',
-        'status' => ProjectStatus::class,
-    ];
+    protected function casts(): array
+    {
+        return [
+            'deadline' => 'date',
+            'status' => ProjectStatus::class,
+        ];
+    }
 
-    public function manager()
+    public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'manager_id');
     }
 
-    public function members()
+    public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }
 
-    public function tasks()
+    public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
     }
 
-    public function comments()
+    public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable');
     }

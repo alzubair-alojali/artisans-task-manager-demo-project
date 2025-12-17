@@ -5,14 +5,17 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -51,22 +54,22 @@ class User extends Authenticatable
         ];
     }
 
-    public function managedProjects()
+    public function managedProjects(): HasMany
     {
         return $this->hasMany(Project::class, 'manager_id');
     }
 
-    public function projects()
+    public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class);
     }
 
-    public function tasks()
+    public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'assigned_to');
     }
 
-    public function comments()
+    public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
     }
