@@ -17,10 +17,12 @@ class Task extends Model
     protected $fillable = [
         'title',
         'description',
+        'due_date',
         'status',
         'priority',
         'project_id',
         'assigned_to',
+        'created_by',
     ];
 
     protected function casts(): array
@@ -28,6 +30,7 @@ class Task extends Model
         return [
             'status' => TaskStatus::class,
             'priority' => TaskPriority::class,
+            'due_date' => 'date',
         ];
     }
 
@@ -39,6 +42,11 @@ class Task extends Model
     public function assignee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function comments(): MorphMany

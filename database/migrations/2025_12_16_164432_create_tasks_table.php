@@ -16,10 +16,12 @@ return new class extends Migration {
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->string('status')->default(TaskStatus::PENDING->value);
+            $table->date('due_date');
+            $table->string('status')->default(TaskStatus::TODO->value);
             $table->string('priority')->default(TaskPriority::MEDIUM->value);
             $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('created_by')->constrained('users');
             $table->softDeletes();
             $table->timestamps();
         });

@@ -155,13 +155,38 @@ class ProjectManagementTest extends TestCase
         $user = User::factory()->create(['role' => UserRole::USER]);
         $user->assignRole(UserRole::USER);
 
-        Project::factory()->create(['status' => ProjectStatus::OPEN]);
-        Project::factory()->create(['status' => ProjectStatus::COMPLETED]);
+        $openProject = Project::factory()->create(['status' => ProjectStatus::OPEN]);
+        $openProject->members()->attach($user);
+
+        $completedProject = Project::factory()->create(['status' => ProjectStatus::COMPLETED]);
+        $completedProject->members()->attach($user);
 
         $response = $this->actingAs($user)->getJson('/api/projects?filter[status]=open');
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.status', ProjectStatus::OPEN->value);
+    }
+
+    public function test_user_can_only_see_projects_they_belong_to(): void
+    {
+        // 1. Create a regular user
+        $user = User::factory()->create(['role' => UserRole::USER]);
+        $user->assignRole(UserRole::USER);
+
+        // 2. Create a project the user belongs to
+        $myProject = Project::factory()->create(['title' => 'My Secret Project']);
+        $myProject->members()->attach($user);
+
+        // 3. Create a project the user does NOT belong to
+        $otherProject = Project::factory()->create(['title' => 'Other Peoples Project']);
+
+        // 4. Request the list
+        $response = $this->actingAs($user)->getJson('/api/projects');
+
+        // 5. Verify Isolation
+        $response->assertStatus(200)
+            ->assertJsonFragment(['title' => 'My Secret Project']) // Should see
+            ->assertJsonMissing(['title' => 'Other Peoples Project']); // Should NOT see
     }
 }

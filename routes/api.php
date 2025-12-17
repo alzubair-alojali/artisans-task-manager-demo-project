@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,5 +16,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:admin')
         ->apiResource('users', \App\Http\Controllers\UserController::class);
+
+    Route::post('projects/{project}/invite', [ProjectController::class, 'invite']);
+    Route::delete('projects/{project}/members/{user}', [ProjectController::class, 'removeMember']);
     Route::apiResource('projects', ProjectController::class);
+
+    Route::post('tasks/{id}/restore', [TaskController::class, 'restore']);
+    Route::delete('tasks/{id}/force-delete', [TaskController::class, 'forceDelete']);
+    Route::apiResource('tasks', TaskController::class);
 });

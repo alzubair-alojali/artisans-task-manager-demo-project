@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Http\Requests\Projects\StoreProjectRequest;
 use App\Http\Requests\Projects\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
@@ -32,12 +35,24 @@ class ProjectController extends Controller
      */
     public function index(): AnonymousResourceCollection
     {
-        $projects = QueryBuilder::for(Project::class)
+        $this->authorize('viewAny', Project::class);
+
+        $user = Auth::user();
+        $query = Project::query();
+
+        // 🛑 Security Patch: Scope projects for regular users
+        if ($user->role === UserRole::USER) {
+            $query->whereHas('members', function ($q) use ($user) {
+                $q->where('users.id', $user->id);
+            });
+        }
+
+        $projects = QueryBuilder::for($query)
             ->allowedFilters(['status', 'title'])
             ->allowedSorts(['deadline', 'created_at'])
             ->allowedIncludes(['manager'])
             ->withCount(['members', 'tasks'])
-            ->get();
+            ->paginate();
 
         return ProjectResource::collection($projects);
     }
@@ -116,6 +131,44 @@ class ProjectController extends Controller
         $this->authorize('delete', $project);
 
         $project->delete();
+
+        return response()->noContent();
+    }
+
+    /**
+     * Invite a user to the project.
+     *
+     * Add a user to the project members.
+     *
+     * @summary Invite Member
+     * @response 200 {"message": "User invited to project successfully."}
+     */
+    public function invite(Request $request, Project $project): JsonResponse
+    {
+        $this->authorize('update', $project);
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $project->members()->syncWithoutDetaching([$validated['user_id']]);
+
+        return response()->json(['message' => 'User invited to project successfully.']);
+    }
+
+    /**
+     * Remove a user from the project.
+     *
+     * Remove a user from the project members.
+     *
+     * @summary Remove Member
+     * @response 204 {}
+     */
+    public function removeMember(Project $project, User $user): Response
+    {
+        $this->authorize('update', $project);
+
+        $project->members()->detach($user->id);
 
         return response()->noContent();
     }
