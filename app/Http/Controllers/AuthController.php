@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
@@ -10,6 +13,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 
 /**
  * @group Authentication
@@ -119,5 +124,76 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * Redirect to Google for authentication.
+     *
+     * Returns the Google OAuth redirect URL.
+     *
+     * @unauthenticated
+     * @response {
+     *   "url": "https://accounts.google.com/o/oauth2/auth?..."
+     * }
+     */
+    public function redirectToGoogle(): JsonResponse
+    {
+        return response()->json([
+            'url' => Socialite::driver('google')->stateless()->redirect()->getTargetUrl(),
+        ]);
+    }
+
+    /**
+     * Handle Google authentication callback.
+     *
+     * Exchanges the Google code for a user and access token.
+     *
+     * @unauthenticated
+     * @response {
+     *   "token": "1|sanctum_token...",
+     *   "user": { ... },
+     *   "message": "Login successful"
+     * }
+     * @response 400 {
+     *   "message": "Google login failed",
+     *   "error": "Error details..."
+     * }
+     */
+    public function handleGoogleCallback(): JsonResponse
+    {
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+
+            $user = User::where('google_id', $googleUser->getId())->first();
+
+            if (!$user) {
+                $user = User::where('email', $googleUser->getEmail())->first();
+
+                if ($user) {
+                    $user->update(['google_id' => $googleUser->getId()]);
+                } else {
+                    $user = User::create([
+                        'name' => $googleUser->getName(),
+                        'email' => $googleUser->getEmail(),
+                        'google_id' => $googleUser->getId(),
+                        'password' => Hash::make(Str::random(24)),
+                        'role' => UserRole::USER,
+                    ]);
+                }
+            }
+
+            $token = $user->createToken('google_auth_token')->plainTextToken;
+
+            return response()->json([
+                'token' => $token,
+                'user' => new UserResource($user),
+                'message' => 'Login successful',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Google login failed',
+                'error' => $e->getMessage(),
+            ], 400);
+        }
     }
 }

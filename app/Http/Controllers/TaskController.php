@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
@@ -7,6 +9,7 @@ use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
+use App\Notifications\TaskAssignedNotification;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -48,15 +51,17 @@ class TaskController extends Controller
 
         $tasks = QueryBuilder::for($query)
             ->allowedFilters([
-                'project_id',
+                AllowedFilter::partial('title'),
                 'status',
                 'priority',
-                'assigned_to',
+                'due_date',
+                'project_id',
+                AllowedFilter::exact('assigned_to_user_id', 'assigned_to'), // Map query param to column
                 AllowedFilter::trashed(),
             ])
-            ->allowedSorts(['due_date', 'priority'])
-            ->with(['project', 'assignee', 'creator'])
-            ->paginate();
+            ->allowedSorts(['due_date', 'created_at', 'priority', 'title'])
+            ->allowedIncludes(['project', 'assignee', 'comments'])
+            ->paginate(15);
 
         return TaskResource::collection($tasks);
     }
@@ -79,6 +84,10 @@ class TaskController extends Controller
         ]);
 
         $task->load(['project', 'assignee', 'creator']);
+
+        if ($task->assignee) {
+            $task->assignee->notify(new TaskAssignedNotification($task));
+        }
 
         return (new TaskResource($task))
             ->response()

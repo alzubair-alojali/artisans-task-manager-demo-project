@@ -40,7 +40,6 @@ class ProjectController extends Controller
         $user = Auth::user();
         $query = Project::query();
 
-        // 🛑 Security Patch: Scope projects for regular users
         if ($user->role === UserRole::USER) {
             $query->whereHas('members', function ($q) use ($user) {
                 $q->where('users.id', $user->id);
