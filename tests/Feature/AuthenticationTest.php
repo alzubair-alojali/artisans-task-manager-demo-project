@@ -88,9 +88,6 @@ class AuthenticationTest extends TestCase
             'Authorization' => 'Bearer ' . $token,
         ])->postJson('/api/logout');
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'message' => 'Logged out successfully',
-            ]);
+        $response->assertStatus(204);
     }
 }

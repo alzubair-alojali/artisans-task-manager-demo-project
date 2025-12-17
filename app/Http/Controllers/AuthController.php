@@ -112,16 +112,12 @@ class AuthController extends Controller
      *
      * Revokes the user's current access token.
      *
-     * @response {
-     *   "message": "Logged out successfully"
-     * }
+     * @response 204 {}
      */
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request): \Illuminate\Http\Response
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Logged out successfully'
-        ]);
+        return response()->noContent();
     }
 }

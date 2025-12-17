@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Response;
 use Spatie\QueryBuilder\QueryBuilder;
 
 /**
@@ -107,10 +108,10 @@ class UserController extends Controller
      * @summary Delete User
      * @response 204 {}
      */
-    public function destroy(User $user): JsonResponse
+    public function destroy(User $user): Response
     {
         $user->delete();
 
-        return response()->json(null, 204);
+        return response()->noContent();
     }
 }
