@@ -24,4 +24,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('tasks/{id}/restore', [TaskController::class, 'restore']);
     Route::delete('tasks/{id}/force-delete', [TaskController::class, 'forceDelete']);
     Route::apiResource('tasks', TaskController::class);
+
+    // Comments
+    Route::apiResource('tasks.comments', \App\Http\Controllers\TaskCommentController::class)->only(['index', 'store']);
+    Route::apiResource('projects.comments', \App\Http\Controllers\ProjectCommentController::class)->only(['index', 'store']);
+    Route::delete('comments/{comment}', [\App\Http\Controllers\CommentController::class, 'destroy']);
 });
