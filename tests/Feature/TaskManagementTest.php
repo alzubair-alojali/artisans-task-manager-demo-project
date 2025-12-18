@@ -127,7 +127,12 @@ class TaskManagementTest extends TestCase
         $manager = User::factory()->create(['role' => UserRole::MANAGER]);
         $manager->assignRole(UserRole::MANAGER);
 
-        $task = Task::factory()->create(['created_by' => $manager->id]);
+        // Manager must be the project's manager to delete tasks
+        $project = Project::factory()->create(['manager_id' => $manager->id]);
+        $task = Task::factory()->create([
+            'project_id' => $project->id,
+            'created_by' => $manager->id,
+        ]);
 
         $response = $this->actingAs($manager)->deleteJson("/api/tasks/{$task->id}");
 
@@ -167,7 +172,9 @@ class TaskManagementTest extends TestCase
         $manager = User::factory()->create(['role' => UserRole::MANAGER]);
         $manager->assignRole(UserRole::MANAGER);
 
-        $task = Task::factory()->create();
+        // Manager must be the project's manager to restore tasks
+        $project = Project::factory()->create(['manager_id' => $manager->id]);
+        $task = Task::factory()->create(['project_id' => $project->id]);
         $task->delete();
 
         $response = $this->actingAs($manager)->postJson("/api/tasks/{$task->id}/restore");
@@ -183,7 +190,9 @@ class TaskManagementTest extends TestCase
         $manager = User::factory()->create(['role' => UserRole::MANAGER]);
         $manager->assignRole(UserRole::MANAGER);
 
-        $task = Task::factory()->create();
+        // Manager must be the project's manager to force delete tasks
+        $project = Project::factory()->create(['manager_id' => $manager->id]);
+        $task = Task::factory()->create(['project_id' => $project->id]);
         $task->delete();
 
         $response = $this->actingAs($manager)->deleteJson("/api/tasks/{$task->id}/force-delete");
