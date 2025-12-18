@@ -3,11 +3,7 @@
 # Optimized for Render.com deployment with PHP 8.2 + Laravel 12
 # =============================================================================
 
-<<<<<<< HEAD
 FROM php:8.4-fpm
-=======
-FROM php:8.2-cli
->>>>>>> 867d62d0f102a9c522287088018041eb92f8f32d
 
 # -----------------------------------------------------------------------------
 # 1. System Dependencies (combined into single layer to reduce image size)
