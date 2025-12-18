@@ -34,7 +34,7 @@ class UserController extends Controller
         $users = QueryBuilder::for(User::class)
             ->allowedFilters(['name', 'email', 'role'])
             ->allowedSorts(['name', 'created_at'])
-            ->get();
+            ->paginate(15);
 
         return UserResource::collection($users);
     }

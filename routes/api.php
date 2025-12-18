@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProjectCommentController;
 use App\Http\Controllers\ProjectController;
@@ -20,9 +21,11 @@ use Illuminate\Support\Facades\Route;
 // Public Routes
 // =========================================================================
 
-// Authentication
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Authentication (Rate Limited)
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 // Socialite (Google)
 Route::prefix('auth/google')->group(function () {
@@ -56,7 +59,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- Projects ---
     Route::apiResource('projects', ProjectController::class);
 
+    // Project Members
+    Route::post('/projects/{project}/invite', [ProjectController::class, 'invite']);
+    Route::delete('/projects/{project}/members/{user}', [ProjectController::class, 'removeMember']);
+
     // Project Comments
+    Route::get('/projects/{project}/comments', [ProjectCommentController::class, 'index']);
     Route::post('/projects/{project}/comments', [ProjectCommentController::class, 'store']);
 
     // --- Tasks ---
@@ -71,6 +79,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('tasks', TaskController::class);
 
     // Task Comments
+    Route::get('/tasks/{task}/comments', [TaskCommentController::class, 'index']);
     Route::post('/tasks/{task}/comments', [TaskCommentController::class, 'store']);
+
+    // --- Comments (Generic Delete) ---
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 
 });

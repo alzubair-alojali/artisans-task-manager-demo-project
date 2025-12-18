@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->string('priority')->default(TaskPriority::MEDIUM->value);
             $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null');
-            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->softDeletes();
             $table->timestamps();
         });

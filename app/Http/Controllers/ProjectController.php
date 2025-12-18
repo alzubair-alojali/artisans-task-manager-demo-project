@@ -7,12 +7,12 @@ namespace App\Http\Controllers;
 use App\Enums\UserRole;
 use App\Http\Requests\Projects\StoreProjectRequest;
 use App\Http\Requests\Projects\UpdateProjectRequest;
+use App\Http\Requests\Projects\InviteMemberRequest;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
@@ -144,15 +144,11 @@ class ProjectController extends Controller
      * @summary Invite Member
      * @response 200 {"message": "User invited to project successfully."}
      */
-    public function invite(Request $request, Project $project): JsonResponse
+    public function invite(InviteMemberRequest $request, Project $project): JsonResponse
     {
         $this->authorize('update', $project);
 
-        $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
-        ]);
-
-        $project->members()->syncWithoutDetaching([$validated['user_id']]);
+        $project->members()->syncWithoutDetaching([$request->validated('user_id')]);
 
         return response()->json(['message' => 'User invited to project successfully.']);
     }

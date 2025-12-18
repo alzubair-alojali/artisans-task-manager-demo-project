@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Enums\UserRole;
@@ -22,8 +24,8 @@ class ProjectPolicy
     public function view(User $user, Project $project): bool
     {
         return $user->hasRole([UserRole::ADMIN->value, UserRole::MANAGER->value]) ||
-            $project->members->contains($user) ||
-            $project->manager_id === $user->id;
+            $project->manager_id === $user->id ||
+            $project->members()->where('users.id', $user->id)->exists();
     }
 
     /**

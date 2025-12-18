@@ -39,14 +39,15 @@ class UserManagementTest extends TestCase
             ]);
     }
 
-    public function test_regular_user_cannot_view_users(): void
+    public function test_regular_user_can_view_users_list(): void
     {
         $user = User::factory()->create(['role' => UserRole::USER]);
         $user->assignRole(UserRole::USER);
 
         $response = $this->actingAs($user)->getJson('/api/users');
 
-        $response->assertStatus(403);
+        // Regular users can list users for dropdown (assignee selection)
+        $response->assertStatus(200);
     }
 
     public function test_admin_can_create_new_user(): void

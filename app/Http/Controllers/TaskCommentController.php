@@ -27,7 +27,7 @@ class TaskCommentController extends Controller
 
         $comments = QueryBuilder::for($task->comments()->getQuery())
             ->allowedSorts(['created_at'])
-            ->allowedIncludes(['user'])
+            ->with(['user'])
             ->paginate(15);
 
         return CommentResource::collection($comments);

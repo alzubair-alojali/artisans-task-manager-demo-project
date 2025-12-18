@@ -23,15 +23,15 @@ class CommentPolicy
     public function viewAny(User $user, $commentable): bool
     {
         if ($commentable instanceof Task) {
-            return $commentable->project->members->contains($user) ||
+            return $user->hasRole(UserRole::ADMIN->value) ||
                 $commentable->project->manager_id === $user->id ||
-                $user->hasRole(UserRole::ADMIN->value);
+                $commentable->project->members()->where('users.id', $user->id)->exists();
         }
 
         if ($commentable instanceof Project) {
-            return $commentable->members->contains($user) ||
+            return $user->hasRole(UserRole::ADMIN->value) ||
                 $commentable->manager_id === $user->id ||
-                $user->hasRole(UserRole::ADMIN->value);
+                $commentable->members()->where('users.id', $user->id)->exists();
         }
 
         return false;
