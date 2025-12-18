@@ -113,7 +113,7 @@ php artisan migrate --seed
 ```
 
 **Default Admin Credentials:**
-- **Email:** `admin@artisans.ly`
+- **Email:** `admin@example.com`
 - **Password:** `password`
 
 ### 5. Running the Application
@@ -194,9 +194,9 @@ php artisan test
 
 ## 🌐 Live Deployment (Bonus)
 
-The API is deployed live on Render.
+The API is deployed live on railway.
 
-**Base URL:** `https://artisans-task-manager.onrender.com/api`
+**Base URL:** `https://artisans-task-manager-demo-project-production.up.railway.app/api`
 
 ---
 
