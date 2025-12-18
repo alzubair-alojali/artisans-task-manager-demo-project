@@ -19,7 +19,7 @@ class CommentFactory extends Factory
     public function definition(): array
     {
         return [
-            'body' => $this->faker->paragraph(),
+            'body' => fake()->paragraph(),
             'user_id' => User::factory(), // Default, but usually overridden
         ];
     }
