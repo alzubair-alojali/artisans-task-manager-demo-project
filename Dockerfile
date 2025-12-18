@@ -111,7 +111,7 @@ EXPOSE 8080
 # -----------------------------------------------------------------------------
 # 14. Startup Command (uses Render's $PORT or defaults to 8080)
 # -----------------------------------------------------------------------------
-CMD php artisan migrate --force \
+CMD php artisan migrate --force --seed \
     && php artisan config:cache \
     && php artisan route:cache \
     && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
