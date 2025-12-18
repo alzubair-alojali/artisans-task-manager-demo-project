@@ -1,6 +1,6 @@
 # =============================================================================
 # Artisans Task Manager API - Production Dockerfile
-# Optimized for Render.com deployment with PHP 8.2 + Laravel 12
+# Optimized for Render.com/Railway deployment with PHP 8.4 + Laravel 12
 # =============================================================================
 
 FROM php:8.4-fpm
@@ -109,9 +109,9 @@ USER appuser
 EXPOSE 8080
 
 # -----------------------------------------------------------------------------
-# 14. Startup Command (uses Render's $PORT or defaults to 8080)
+# 14. Startup Command (UPDATED: Removed --seed)
 # -----------------------------------------------------------------------------
-CMD php artisan migrate --force --seed \
+CMD php artisan migrate --force \
     && php artisan config:cache \
     && php artisan route:cache \
     && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
